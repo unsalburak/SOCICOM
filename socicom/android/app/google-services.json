@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "338780129147",
+    "project_id": "socicom-d05d6",
+    "storage_bucket": "socicom-d05d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338780129147:android:a657b8e42936ad4530dfde",
+        "android_client_info": {
+          "package_name": "com.example.socicom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxgPAPrBseAUpiNWYXsmDKn01nm_aMJDA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

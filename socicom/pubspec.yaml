@@ -1,0 +1,49 @@
+name: socicom
+description: "A new Flutter project."
+
+publish_to: 'none' 
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_maps_flutter: ^2.9.0
+  location: ^7.0.1
+  geocoding: ^3.0.0
+  image_picker: ^1.1.2
+  firebase_core: ^3.7.0
+  cloud_firestore: ^5.4.5
+
+
+  
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+ 
+  flutter_lints: ^4.0.0
+
+
+flutter:
+  assets:
+  - assets/socicom_logo.png
+  - assets/CustomerProfilePhoto.png
+  fonts:
+    - family: MontserratAlternates
+      fonts:
+        - asset: assets/fonts/MontserratAlternates-SemiBoldItalic.ttf
+
+  
+  uses-material-design: true
+
+  
+
+
