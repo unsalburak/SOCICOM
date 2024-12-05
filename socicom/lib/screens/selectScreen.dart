@@ -44,7 +44,7 @@ class SelectScreen extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 50), // Butonun genişliği
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20), // Yuvarlak köşeler
-                        side: BorderSide(color: Colors.black), // Siyah çerçeve
+                        side: const BorderSide(color: Colors.black), // Siyah çerçeve
                       ),
                     ),
                     child: const Text(
@@ -67,7 +67,7 @@ class SelectScreen extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 50), // Butonun genişliği
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20), // Yuvarlak köşeler
-                        side: BorderSide(color: Colors.black), // Siyah çerçeve
+                        side: const BorderSide(color: Colors.black), // Siyah çerçeve
                       ),
                     ),
                     child: const Text(

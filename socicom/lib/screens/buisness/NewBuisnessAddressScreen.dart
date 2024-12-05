@@ -5,6 +5,8 @@ import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
 
 class NewBusinessAddressScreen extends StatefulWidget {
+  const NewBusinessAddressScreen({super.key});
+
   @override
   _NewBusinessAddressScreenState createState() =>
       _NewBusinessAddressScreenState();
@@ -14,7 +16,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
   location_package.LocationData? _currentLocation;
-  location_package.Location _locationService = location_package.Location();
+  final location_package.Location _locationService = location_package.Location();
   bool _permissionGranted = false;
   LatLng? _selectedLocation;
   String? _selectedAddress;
@@ -109,7 +111,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Seçilen Konum Bilgileri"),
+            title: const Text("Seçilen Konum Bilgileri"),
             content: Text(
               _selectedAddress ?? "Adres bulunamadı.",
             ),
@@ -118,7 +120,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text("Tamam"),
+                child: const Text("Tamam"),
               ),
             ],
           );
@@ -126,7 +128,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Lütfen bir konum seçin."),
         ),
       );
@@ -139,7 +141,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Adres Bilgileri',
           style: TextStyle(color: Colors.black),
         ),
@@ -150,7 +152,7 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Harita Alanı
               Expanded(
                 child: _permissionGranted && _currentLocation != null
@@ -169,34 +171,34 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
                         markers: _selectedLocation != null
                             ? {
                                 Marker(
-                                  markerId: MarkerId('selected_location'),
+                                  markerId: const MarkerId('selected_location'),
                                   position: _selectedLocation!,
                                 ),
                               }
                             : {},
                       )
-                    : Center(
+                    : const Center(
                         child: CircularProgressIndicator(), // Konum alınana kadar gösterilecek yükleme göstergesi
                       ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Adres Kaydet Butonu
               ElevatedButton(
                 onPressed: _showLocationDialog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Adres Kaydet',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),

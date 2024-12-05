@@ -5,6 +5,8 @@ import 'package:socicom/screens/buisness/NewBuisnessAddressScreen.dart';
 import 'package:socicom/screens/buisness/NewBuisnessMenuScreen.dart';
 
 class NewBusinessProfileScreen extends StatefulWidget {
+  const NewBusinessProfileScreen({super.key});
+
   @override
   _NewBusinessProfileScreenState createState() => _NewBusinessProfileScreenState();
 }
@@ -35,7 +37,7 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Yeni İşletme Profil Bilgileri',
           style: TextStyle(color: Colors.black),
         ),
@@ -47,7 +49,7 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Profil fotoğrafı ekleme alanı
                 GestureDetector(
                   onTap: _pickImage,
@@ -56,11 +58,11 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     backgroundColor: Colors.grey[200],
                     backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
                     child: _selectedImage == null
-                        ? Icon(Icons.add_a_photo, size: 50, color: Colors.black54)
+                        ? const Icon(Icons.add_a_photo, size: 50, color: Colors.black54)
                         : null,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // İşletme ismi TextField
                 TextField(
                   controller: _businessNameController,
@@ -68,11 +70,11 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     labelText: 'İşletme ismi',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.orangeAccent),
+                      borderSide: const BorderSide(color: Colors.orangeAccent),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // İşletme Telefon Numarası TextField
                 TextField(
                   controller: _phoneController,
@@ -80,11 +82,11 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     labelText: 'İşletme Telefon Numarası',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.orangeAccent),
+                      borderSide: const BorderSide(color: Colors.orangeAccent),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Hakkında TextField
                 TextField(
                   controller: _aboutController,
@@ -92,11 +94,11 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     labelText: 'Hakkında',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.orangeAccent),
+                      borderSide: const BorderSide(color: Colors.orangeAccent),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // E-posta adresi TextField
                 TextField(
                   controller: _emailController,
@@ -104,11 +106,11 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     labelText: 'E-PostaAdresi',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.orangeAccent),
+                      borderSide: const BorderSide(color: Colors.orangeAccent),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Şifre TextField
                 TextField(
                   controller: _passwordController,
@@ -117,7 +119,7 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     labelText: 'Şifre',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.orangeAccent),
+                      borderSide: const BorderSide(color: Colors.orangeAccent),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -131,7 +133,7 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Menü ve Adres Bilgileri Butonları
                 Row(
                   children: [
@@ -146,18 +148,18 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orangeAccent,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Menü Bilgileri',
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -169,12 +171,12 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orangeAccent,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Adres Bilgileri',
                           style: TextStyle(fontSize: 16),
                         ),
@@ -182,7 +184,7 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Yeni Hesap Oluştur Butonu
                 ElevatedButton(
                   onPressed: () {
@@ -190,13 +192,13 @@ class _NewBusinessProfileScreenState extends State<NewBusinessProfileScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orangeAccent,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    minimumSize: Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Yeni Hesap Oluştur',
                     style: TextStyle(fontSize: 18),
                   ),

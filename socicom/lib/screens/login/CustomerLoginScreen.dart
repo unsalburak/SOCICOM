@@ -1,49 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socicom/screens/customer/NewCustomerProfileScreen.dart';
-import 'package:socicom/screens/customer/CustomerMainPage.dart'; // CustomerMainPage'i ekleyin
+import 'package:socicom/BottomNavigatorBar.dart';
+import 'package:socicom/screens/customer/CustomerMainPage.dart';
+import 'package:socicom/screens/customer/NewCustomerProfileScreen.dart'; // Yeni sayfa import edilmiştir.
 
 class CustomerLoginScreen extends StatefulWidget {
+  const CustomerLoginScreen({super.key});
+
   @override
   _CustomerLoginScreenState createState() => _CustomerLoginScreenState();
 }
 
 class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
-  bool _isPasswordVisible = false; // Şifre göster/gizle durumu
+  bool _isPasswordVisible = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // Giriş yapma fonksiyonu
   Future<void> loginUser() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
     try {
-      // Firestore'dan e-posta ve şifreyi doğrulama
+      // Firestore'dan kullanıcı sorgulama
       final querySnapshot = await FirebaseFirestore.instance
           .collection('profiles')
           .where('email', isEqualTo: email)
-          .where('password', isEqualTo: password) // Şifreyi String olarak kontrol
+          .where('password', isEqualTo: password)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Giriş başarılı
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Giriş başarılı!')),
-        );
-        // CustomerMainPage sayfasına yönlendirme
+        // Kullanıcı bilgilerini al
+        final userDocument = querySnapshot.docs.first;
+        final userData = userDocument.data();
+        final documentId = userDocument.id;
+
+        userData['documentId'] = documentId; // documentId ekle
+
+        print('Firestore Sorgu Başarılı: $userData'); // Loglama
+
+        // Navigator ile geçiş
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CustomerMainPage()),
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              body: CustomerMainPage(),
+              bottomNavigationBar: BottomNavigator(
+                currentIndex: 0,
+                userData: userData, // Tüm kullanıcı verileri aktarılıyor
+                userId: documentId, // userId parametresi burada sağlanıyor
+              ),
+            ),
+          ),
         );
       } else {
-        // Giriş başarısız
+        // Kullanıcı bulunamadı
+        print('HATA: Firestore sorgusu boş döndü.');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hatalı e-posta veya şifre')),
+          const SnackBar(content: Text('Hatalı e-posta veya şifre')),
         );
       }
     } catch (e) {
-      // Hata durumunda mesaj gösterme
+      print('Firestore Hatası: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Bir hata oluştu: $e')),
       );
@@ -57,13 +74,12 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.black),
+          icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -71,18 +87,15 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/socicom_logo.png', // Logonun yolu
+                'assets/socicom_logo.png',
                 height: 150,
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Giriş Yap',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(
@@ -90,11 +103,10 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                   hintText: 'example@email.com',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.orangeAccent),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: passwordController,
                 obscureText: !_isPasswordVisible,
@@ -102,7 +114,6 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                   labelText: 'Şifre',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.orangeAccent),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -116,63 +127,51 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              TextButton(
-                onPressed: () {
-                  // Şifremi unuttum aksiyonu
-                },
-                child: Text.rich(
-                  TextSpan(
-                    text: 'Şifremi ',
-                    children: [
-                      TextSpan(
-                        text: 'Unuttum',
-                        style: TextStyle(color: Colors.orangeAccent),
-                      ),
-                    ],
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Giriş yapma fonksiyonunu çağır
-                  loginUser();
-                },
+                onPressed: loginUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Müşteri Giriş',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      // Şifremi Unuttum (Şimdilik bir şey yapmıyor)
+                    },
+                    child: const Text(
+                      'Şifremi Unuttum',
+                      style: TextStyle(color: Colors.orange),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  // Yeni Hesap Oluştur (NewCustomerProfileScreen'e yönlendiriyor)
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NewCustomerProfileScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const NewCustomerProfileScreen(),
+                    ),
                   );
                 },
-                child: Text.rich(
-                  TextSpan(
-                    text: 'Yeni ',
-                    children: [
-                      TextSpan(
-                        text: 'Hesap Oluştur',
-                        style: TextStyle(color: Colors.orangeAccent),
-                      ),
-                    ],
-                    style: TextStyle(color: Colors.black),
-                  ),
+                child: const Text(
+                  'Yeni Hesap Oluştur',
+                  style: TextStyle(color: Colors.orange),
                 ),
               ),
             ],

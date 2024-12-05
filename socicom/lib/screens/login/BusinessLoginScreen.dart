@@ -3,6 +3,8 @@ import 'package:socicom/screens/buisness/NewBuisnessProfileScreen.dart';
  // NewBusinessProfileScreen için doğru import
 
 class BuisnessLoginScreen extends StatefulWidget {
+  const BuisnessLoginScreen({super.key});
+
   @override
   _BuisnessLoginScreenState createState() => _BuisnessLoginScreenState();
 }
@@ -19,7 +21,7 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.black),
+          icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () {
             // Sayfayı kapatma
             Navigator.pop(context);
@@ -38,16 +40,16 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                 'assets/socicom_logo.png', // Logonun yolu
                 height: 150,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // "Giriş Yap" başlığı
-              Text(
+              const Text(
                 'Giriş Yap',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               // E-Posta TextField
               TextField(
                 controller: emailController,
@@ -56,11 +58,11 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                   hintText: 'example@email.com',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.orangeAccent),
+                    borderSide: const BorderSide(color: Colors.orangeAccent),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Şifre TextField
               TextField(
                 controller: passwordController,
@@ -69,7 +71,7 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                   labelText: 'Şifre',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.orangeAccent),
+                    borderSide: const BorderSide(color: Colors.orangeAccent),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -85,13 +87,13 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               // "Şifremi Unuttum" butonu (Ortalanmış ve "Yeni Hesap Oluştur" ile aynı)
               TextButton(
                 onPressed: () {
                   // Şifremi unuttum aksiyonu
                 },
-                child: Text.rich(
+                child: const Text.rich(
                   TextSpan(
                     text: 'Şifremi ',
                     children: [
@@ -104,7 +106,7 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // İşletme Giriş Butonu
               ElevatedButton(
                 onPressed: () {
@@ -113,18 +115,18 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'İşletme Giriş',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // "Yeni Hesap Oluştur" butonu
               TextButton(
                 onPressed: () {
@@ -134,7 +136,7 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                     MaterialPageRoute(builder: (context) => NewBusinessProfileScreen()), // NewBusinessProfileScreen'e yönlendirme
                   );
                 },
-                child: Text.rich(
+                child: const Text.rich(
                   TextSpan(
                     text: 'Yeni ',
                     children: [

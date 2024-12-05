@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as location_package;
-import 'package:socicom/BottomNavigatorBar.dart';
 
 class CustomerMainPage extends StatefulWidget {
+  const CustomerMainPage({super.key});
+
   @override
   _CustomerMainPageState createState() => _CustomerMainPageState();
 }
@@ -14,7 +15,7 @@ class _CustomerMainPageState extends State<CustomerMainPage> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
   location_package.LocationData? _currentLocation;
-  location_package.Location _locationService = location_package.Location();
+  final location_package.Location _locationService = location_package.Location();
   bool _permissionGranted = false;
 
   @override
@@ -129,7 +130,6 @@ class _CustomerMainPageState extends State<CustomerMainPage> {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNavigator(currentIndex: 0),
     );
   }
 

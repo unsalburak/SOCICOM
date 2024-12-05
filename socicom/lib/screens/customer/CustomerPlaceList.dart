@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:socicom/BottomNavigatorBar.dart'; // BottomNavigatorBar'ın yolu
 
 class CustomerPlaceList extends StatefulWidget {
+  final String userId; // Kullanıcı ID'si
+  final Map<String, dynamic>? userData; // Kullanıcı bilgileri (isteğe bağlı)
+
+  const CustomerPlaceList({super.key, required this.userId, this.userData});
+
   @override
   _CustomerPlaceListState createState() => _CustomerPlaceListState();
 }
 
 class _CustomerPlaceListState extends State<CustomerPlaceList> {
-  int _selectedIndex = 1; // İşletmeler sekmesi için varsayılan index (1)
-
-  // Navigasyon değişikliğini kontrol eden fonksiyon
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    // Burada alt menü için yönlendirme yapılabilir.
-    // Örneğin: Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen()));
-  }
-
   @override
   Widget build(BuildContext context) {
     // İşletme isimleri ve ilgili yönlendirme rotaları
@@ -31,7 +26,7 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("İşletme Listesi"),
+        title: const Text("İşletme Listesi"),
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -47,13 +42,13 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
               ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.grey.shade200, // Geçici bir arka plan
-                  child: Icon(Icons.store, color: Colors.orange), // Simge
-                  radius: 25,
+                  backgroundColor: Colors.grey.shade200, // Simge
+                  radius: 25, // Geçici bir arka plan
+                  child: Icon(Icons.store, color: Colors.orange),
                 ),
                 title: Text(
                   businessList[index]["name"]!,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onTap: () {
                   // İşletme profiline yönlendirme
@@ -64,29 +59,10 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Ana Sayfa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'İşletmeler',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Arkadaşlar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
+      bottomNavigationBar: BottomNavigator(
+        currentIndex: 1,
+        userId: widget.userId, // userId parametresi eklendi
+        userData: widget.userData, // userData da isteğe bağlı olarak eklendi
       ),
     );
   }
