@@ -21,8 +21,8 @@ class SocicomApp extends StatelessWidget {
       initialRoute: '/', // Başlangıç rotası
       routes: {
         '/': (context) => const SelectScreen(), // Ana giriş ekranı
-        '/customerLogin': (context) => CustomerLoginScreen(), // Müşteri Giriş ekranı
-        '/businessLogin': (context) => BuisnessLoginScreen(), // İşletme Giriş ekranı
+        '/customerLogin': (context) => const CustomerLoginScreen(), // Müşteri Giriş ekranı
+        '/businessLogin': (context) => const BuisnessLoginScreen(), // İşletme Giriş ekranı
       },
     );
   }

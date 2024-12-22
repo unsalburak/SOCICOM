@@ -8,8 +8,7 @@ class CustomerProfile extends StatefulWidget {
   final Map<String, dynamic> userData;
   final String userId;
 
-  const CustomerProfile({Key? key, required this.userData, required this.userId})
-      : super(key: key);
+  const CustomerProfile({super.key, required this.userData, required this.userId});
 
   @override
   _CustomerProfileState createState() => _CustomerProfileState();
@@ -233,7 +232,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: saveProfile,
-              child: const Text('Düzenle'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -242,6 +240,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              child: const Text('Düzenle'),
             ),
           ],
         ),

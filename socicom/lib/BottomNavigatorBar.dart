@@ -38,7 +38,7 @@ class BottomNavigator extends StatelessWidget {
 
     switch (index) {
       case 0:
-        targetPage = CustomerMainPage();
+        targetPage = const CustomerMainPage();
         break;
       case 1:
         targetPage = CustomerPlaceList(

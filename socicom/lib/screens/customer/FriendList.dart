@@ -2,139 +2,186 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socicom/BottomNavigatorBar.dart';
 
-class FriendsList extends StatelessWidget {
+class FriendsList extends StatefulWidget {
   final String userId; // Kullanıcı ID'si
   final Map<String, dynamic>? userData; // Kullanıcı bilgileri
 
   const FriendsList({super.key, required this.userId, this.userData});
 
- Future<List<Map<String, dynamic>>> fetchFriends() async {
-  List<Map<String, dynamic>> friends = [];
-
-  try {
-    // userData'dan userid alınıyor
-    final String actualUserId = userData?['userid'] ?? ''; // 'userid' doğru değerle alınır
-
-    if (actualUserId.isEmpty) {
-      print("Geçerli bir userid bulunamadı.");
-      return [];
-    }
-
-    // İlk olarak userid alanına göre doğru belgeyi bul
-    QuerySnapshot profileSnapshot = await FirebaseFirestore.instance
-        .collection('profiles')
-        .where('userid', isEqualTo: actualUserId) // 'userid' kullanılıyor
-        .get();
-
-    print("Profiles'dan dönen belgeler: ${profileSnapshot.docs}");
-
-    if (profileSnapshot.docs.isEmpty) {
-      print("Kullanıcı profili bulunamadı: $actualUserId");
-      return [];
-    }
-
-    // İlk belgeyi al
-    DocumentSnapshot userProfile = profileSnapshot.docs.first;
-
-    // Bulunan belgenin altındaki friends koleksiyonuna eriş
-    QuerySnapshot friendsSnapshot = await FirebaseFirestore.instance
-        .collection('profiles')
-        .doc(userProfile.id) // Bulunan belgenin ID'si
-        .collection('friends')
-        .get();
-
-    print("Friends'den dönen belgeler: ${friendsSnapshot.docs}");
-
-    // Eğer friends alt koleksiyonu boşsa, kullanıcıya arkadaş yok mesajı göster
-    if (friendsSnapshot.docs.isEmpty) {
-      print("Hiç arkadaş bulunamadı (friends alt koleksiyonu boş).");
-      return [];
-    }
-
-    // Friends koleksiyonundaki tüm userid'leri al
-    List<String> friendUserIds = friendsSnapshot.docs
-        .map((doc) => doc['userid'] as String) // 'userid' kullanılıyor
-        .toList();
-
-    print("Arkadaşların userid'leri: $friendUserIds");
-
-    if (friendUserIds.isEmpty) {
-      print("Hiç arkadaş yok!");
-      return [];
-    }
-
-    // Profiles koleksiyonunda arkadaşların bilgilerini al
-    QuerySnapshot profilesSnapshot = await FirebaseFirestore.instance
-        .collection('profiles')
-        .where('userid', whereIn: friendUserIds) // 'userid' ile sorgu
-        .get();
-
-    print("Profiles'dan arkadaş bilgilerinden dönen belgeler: ${profilesSnapshot.docs}");
-
-    for (var doc in profilesSnapshot.docs) {
-      Map<String, dynamic> friendData = doc.data() as Map<String, dynamic>;
-      friends.add(friendData);
-    }
-
-    print("Arkadaşlar başarıyla alındı: ${friends.length}");
-  } catch (e) {
-    print("Hata: $e");
-  }
-
-  return friends;
+  @override
+  _FriendsListState createState() => _FriendsListState();
 }
 
+class _FriendsListState extends State<FriendsList> {
+  final TextEditingController _usernameController = TextEditingController();
+
+  Future<List<Map<String, dynamic>>> fetchFriends() async {
+    // Aynı fetchFriends fonksiyonunuz devam ediyor.
+    List<Map<String, dynamic>> friends = [];
+    try {
+      final String actualUserId = widget.userData?['userid'] ?? '';
+      if (actualUserId.isEmpty) return [];
+
+      QuerySnapshot profileSnapshot = await FirebaseFirestore.instance
+          .collection('profiles')
+          .where('userid', isEqualTo: actualUserId)
+          .get();
+
+      if (profileSnapshot.docs.isEmpty) return [];
+
+      DocumentSnapshot userProfile = profileSnapshot.docs.first;
+
+      QuerySnapshot friendsSnapshot = await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(userProfile.id)
+          .collection('friends')
+          .get();
+
+      List<String> friendUserIds = friendsSnapshot.docs
+          .map((doc) => doc['userid'] as String)
+          .toList();
+
+      QuerySnapshot profilesSnapshot = await FirebaseFirestore.instance
+          .collection('profiles')
+          .where('userid', whereIn: friendUserIds)
+          .get();
+
+      for (var doc in profilesSnapshot.docs) {
+        friends.add(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Hata: $e");
+    }
+
+    return friends;
+  }
+
+  Future<void> addFriend(String username) async {
+    try {
+      final userId = widget.userData?['userid'];
+      if (userId == null || userId.isEmpty) return;
+
+      // Kullanıcı adını `profiles` koleksiyonunda arayın
+      QuerySnapshot userQuery = await FirebaseFirestore.instance
+          .collection('profiles')
+          .where('username', isEqualTo: username)
+          .get();
+
+      if (userQuery.docs.isEmpty) {
+        print("Kullanıcı bulunamadı.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Kullanıcı bulunamadı!")),
+        );
+        return;
+      }
+
+      // İlk sonucu arkadaş olarak ekle
+      DocumentSnapshot friendDoc = userQuery.docs.first;
+      String friendUserId = friendDoc['userid'];
+
+      // Arkadaş ekleme işlemi
+      await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(widget.userData?['docId']) // Kullanıcının belgesi
+          .collection('friends')
+          .doc(friendUserId)
+          .set({
+        'userid': friendUserId,
+        'name': friendDoc['name'] ?? '',
+        'email': friendDoc['email'] ?? '',
+        'profileImage': friendDoc['profileImage'] ?? '',
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Arkadaş eklendi!")),
+      );
+    } catch (e) {
+      print("Arkadaş eklenirken hata oluştu: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bir hata oluştu!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Arkadaşlar")),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchFriends(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text("Bir hata oluştu: ${snapshot.error}"));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Hiç arkadaşınız yok!"));
-          }
-
-          List<Map<String, dynamic>> friends = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: friends.length,
-            itemBuilder: (context, index) {
-              final friend = friends[index];
-
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: friend['profileImage'] != null &&
-                          friend['profileImage'].isNotEmpty
-                      ? NetworkImage(friend['profileImage'])
-                      : null,
-                  child: friend['profileImage'] == null
-                      ? const Icon(Icons.person)
-                      : null,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: "Arkadaş Kullanıcı Adı",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
                 ),
-                title: Text(friend['name'] ?? 'İsimsiz Kullanıcı'),
-                subtitle: Text(friend['email'] ?? ''),
-                onTap: () {
-                  print("Arkadaş ID: ${friend['userid']}");
-                },
-              );
-            },
-          );
-        },
+                IconButton(
+                  icon: const Icon(Icons.person_add),
+                  onPressed: () {
+                    final username = _usernameController.text.trim();
+                    if (username.isNotEmpty) {
+                      addFriend(username);
+                      _usernameController.clear();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: fetchFriends(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text("Bir hata oluştu: ${snapshot.error}"));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("Hiç arkadaşınız yok!"));
+                }
+
+                List<Map<String, dynamic>> friends = snapshot.data!;
+
+                return ListView.builder(
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    final friend = friends[index];
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: friend['profileImage'] != null &&
+                                friend['profileImage'].isNotEmpty
+                            ? NetworkImage(friend['profileImage'])
+                            : null,
+                        child: friend['profileImage'] == null
+                            ? const Icon(Icons.person)
+                            : null,
+                      ),
+                      title: Text(friend['name'] ?? 'İsimsiz Kullanıcı'),
+                      subtitle: Text(friend['email'] ?? ''),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigator(
         currentIndex: 2,
-        userId: userId,
-        userData: userData,
+        userId: widget.userId,
+        userData: widget.userData,
       ),
     );
   }

@@ -43,7 +43,8 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => Scaffold(
-              body: CustomerMainPage(),
+
+              body: const CustomerMainPage(),
               bottomNavigationBar: BottomNavigator(
                 currentIndex: 0,
                 userData: userData, // Tüm kullanıcı verileri aktarılıyor
@@ -70,6 +71,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Arka plan rengini beyaz yapar
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -140,7 +142,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                 ),
                 child: const Text(
                   'Müşteri Giriş',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 18,color: Colors.white),
                 ),
               ),
               const SizedBox(height: 20),

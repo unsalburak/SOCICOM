@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as location_package;
-import 'package:geocoding/geocoding.dart';
 
 class NewBusinessAddressScreen extends StatefulWidget {
   const NewBusinessAddressScreen({super.key});
@@ -19,7 +18,6 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
   final location_package.Location _locationService = location_package.Location();
   bool _permissionGranted = false;
   LatLng? _selectedLocation;
-  String? _selectedAddress;
 
   @override
   void initState() {
@@ -44,7 +42,8 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
       final locationData = await _locationService.getLocation();
       setState(() {
         _currentLocation = locationData;
-        _selectedLocation = LatLng(locationData.latitude!, locationData.longitude!);
+        _selectedLocation =
+            LatLng(locationData.latitude!, locationData.longitude!);
       });
       _moveCameraToCurrentLocation();
     } catch (e) {
@@ -54,10 +53,11 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
 
   Future<void> _moveCameraToCurrentLocation() async {
     if (_currentLocation != null && _mapControllerCompleter.isCompleted) {
-      final GoogleMapController controller = await _mapControllerCompleter.future;
-      final currentLatLng = LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+      final GoogleMapController controller =
+          await _mapControllerCompleter.future;
+      final currentLatLng = LatLng(
+          _currentLocation!.latitude!, _currentLocation!.longitude!);
 
-      // Kamera pozisyonunu kullanıcının mevcut konumuna taşı
       controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -82,55 +82,21 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
     }
   }
 
-  void _onTap(LatLng position) async {
+  void _onTap(LatLng position) {
     setState(() {
       _selectedLocation = position;
-      _selectedAddress = "Adres alınıyor...";
     });
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        setState(() {
-          _selectedAddress =
-              "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
-        });
-      }
-    } catch (e) {
-      print("Hata: Adres alınamadı - $e");
-      setState(() {
-        _selectedAddress = "Adres alınamadı";
-      });
-    }
   }
 
-  void _showLocationDialog() {
+  void _saveAndReturn() {
     if (_selectedLocation != null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Seçilen Konum Bilgileri"),
-            content: Text(
-              _selectedAddress ?? "Adres bulunamadı.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Tamam"),
-              ),
-            ],
-          );
-        },
-      );
+      Navigator.pop(context, {
+        'latitude': _selectedLocation!.latitude,
+        'longitude': _selectedLocation!.longitude,
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Lütfen bir konum seçin."),
-        ),
+        const SnackBar(content: Text("Lütfen bir konum seçin.")),
       );
     }
   }
@@ -153,7 +119,6 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              // Harita Alanı
               Expanded(
                 child: _permissionGranted && _currentLocation != null
                     ? GoogleMap(
@@ -171,20 +136,20 @@ class _NewBusinessAddressScreenState extends State<NewBusinessAddressScreen> {
                         markers: _selectedLocation != null
                             ? {
                                 Marker(
-                                  markerId: const MarkerId('selected_location'),
+                                  markerId:
+                                      const MarkerId('selected_location'),
                                   position: _selectedLocation!,
                                 ),
                               }
                             : {},
                       )
                     : const Center(
-                        child: CircularProgressIndicator(), // Konum alınana kadar gösterilecek yükleme göstergesi
+                        child: CircularProgressIndicator(),
                       ),
               ),
               const SizedBox(height: 20),
-              // Adres Kaydet Butonu
               ElevatedButton(
-                onPressed: _showLocationDialog,
+                onPressed: _saveAndReturn,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socicom/screens/buisness/NewBuisnessProfileScreen.dart';
- // NewBusinessProfileScreen için doğru import
+import 'package:socicom/screens/buisness/BuisnessMainPage.dart'; // İşletme ana sayfası için import
 
 class BuisnessLoginScreen extends StatefulWidget {
   const BuisnessLoginScreen({super.key});
@@ -14,6 +15,83 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+Future<void> loginUser() async {
+  String email = emailController.text.trim();
+  String passwordInput = passwordController.text.trim();
+
+  // Kullanıcıdan alınan şifreyi int türüne dönüştür
+  int? password = int.tryParse(passwordInput);
+
+  if (password == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Şifre yalnızca sayılardan oluşmalıdır.')),
+    );
+    return;
+  }
+
+  try {
+    // Firestore'dan kullanıcı bilgilerini sorgula
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('buisness_profiles')
+        .where('buisness_email', isEqualTo: email)
+        .where('buisness_password', isEqualTo: password)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Ana belgeyi al
+      final userDocument = querySnapshot.docs.first;
+      final documentId = userDocument.id; // Belge ID'si
+      final buisnessData = userDocument.data(); // Ana belge verileri
+
+      // Alt koleksiyonları sorgula: Menü
+      final menuSnapshot = await FirebaseFirestore.instance
+          .collection('buisness_profiles')
+          .doc(documentId)
+          .collection('menu')
+          .get();
+
+      final menuData = {
+        for (var doc in menuSnapshot.docs) doc.id: doc.data()
+      };
+
+      // Alt koleksiyonları sorgula: Adres
+      final addressSnapshot = await FirebaseFirestore.instance
+          .collection('buisness_profiles')
+          .doc(documentId)
+          .collection('address')
+          .get();
+
+      final addressData = {
+        for (var doc in addressSnapshot.docs) doc.id: doc.data()
+      };
+
+      // Ana sayfaya yönlendirme
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BuisnessMainPage(
+            buisnessData: buisnessData,
+            menuData: menuData,
+            addressData: addressData,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hatalı e-posta veya şifre')),
+      );
+    }
+  } catch (e) {
+    print('Firestore Hatası: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Bir hata oluştu: $e')),
+    );
+  }
+}
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +101,6 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () {
-            // Sayfayı kapatma
             Navigator.pop(context);
           },
         ),
@@ -37,11 +114,10 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
             children: [
               // Logo
               Image.asset(
-                'assets/socicom_logo.png', // Logonun yolu
+                'assets/socicom_logo.png',
                 height: 150,
               ),
               const SizedBox(height: 20),
-              // "Giriş Yap" başlığı
               const Text(
                 'Giriş Yap',
                 style: TextStyle(
@@ -88,7 +164,6 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              // "Şifremi Unuttum" butonu (Ortalanmış ve "Yeni Hesap Oluştur" ile aynı)
               TextButton(
                 onPressed: () {
                   // Şifremi unuttum aksiyonu
@@ -107,11 +182,8 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // İşletme Giriş Butonu
               ElevatedButton(
-                onPressed: () {
-                  // İşletme Giriş aksiyonu
-                },
+                onPressed: loginUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
                   foregroundColor: Colors.white,
@@ -127,13 +199,14 @@ class _BuisnessLoginScreenState extends State<BuisnessLoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // "Yeni Hesap Oluştur" butonu
               TextButton(
                 onPressed: () {
                   // Yeni hesap oluştur sayfasına yönlendirme
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NewBusinessProfileScreen()), // NewBusinessProfileScreen'e yönlendirme
+                    MaterialPageRoute(
+                      builder: (context) => const NewBuisnessProfileScreen(),
+                    ),
                   );
                 },
                 child: const Text.rich(
