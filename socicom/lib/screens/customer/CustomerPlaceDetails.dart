@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:socicom/screens/customer/CustomerDirections.dart';
+import 'package:socicom/screens/customer/CustomerPlaceMenuScreen.dart';
 
 class CustomerPlaceDetails extends StatefulWidget {
   final Map<String, dynamic> customerData;
   final Map<String, dynamic>? userData;
+  final String userId;
 
-  const CustomerPlaceDetails({required this.customerData, this.userData, super.key});
+  const CustomerPlaceDetails({
+    required this.customerData,
+    this.userData,
+    required this.userId,
+    super.key,
+  });
 
   @override
   State<CustomerPlaceDetails> createState() => _CustomerPlaceDetailsState();
@@ -41,23 +49,22 @@ class _CustomerPlaceDetailsState extends State<CustomerPlaceDetails> {
         age = calculateAgeFromTimestamp(birthDateTimestamp);
       }
 
-      // İşletme ID'sini ve belge ID'sini al
+      // İşletme ID'sini al
       final String? businessId = widget.customerData['buisness_id'];
-      final String? documentIdFromCustomer = widget.customerData['documentId'];
 
-      if (businessId == null || documentIdFromCustomer == null) {
+      if (businessId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("İşletme veya belge ID'si eksik, giriş yapılamadı.")),
+          const SnackBar(content: Text("İşletme ID'si eksik, giriş yapılamadı.")),
         );
         return;
       }
 
+      // Kullanıcı girişini kaydet
       final docRef = await FirebaseFirestore.instance.collection('ben_buradayim').add({
-        'gender': gender, // Kullanıcının cinsiyeti
-        'age': age, // Kullanıcının yaşı
-        'entry_time': FieldValue.serverTimestamp(), // Giriş zamanı
-        'buisness_id': businessId, // İşletme ID'si
-        'document_id': documentIdFromCustomer, // Belge ID'si
+        'gender': gender,
+        'age': age,
+        'entry_time': FieldValue.serverTimestamp(),
+        'buisness_id': businessId,
       });
 
       setState(() {
@@ -168,8 +175,8 @@ class _CustomerPlaceDetailsState extends State<CustomerPlaceDetails> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MenuScreen(
-                          businessId: widget.customerData['documentId'],
+                        builder: (context) => CustomerPlaceDetailsMenuScreen(
+                          businessId: widget.customerData['buisness_id'], // buisness_id gönderiliyor
                         ),
                       ),
                     );
@@ -185,8 +192,8 @@ class _CustomerPlaceDetailsState extends State<CustomerPlaceDetails> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddressScreen(
-                          businessId: widget.customerData['documentId'],
+                        builder: (context) => CustomerDirectionsWithRoute(
+                          buisnessId: widget.customerData['buisness_id'], // buisness_id gönderiliyor
                         ),
                       ),
                     );
@@ -217,98 +224,6 @@ class _CustomerPlaceDetailsState extends State<CustomerPlaceDetails> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// Menü Ekranı
-class MenuScreen extends StatelessWidget {
-  final String businessId;
-
-  const MenuScreen({required this.businessId, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Menü"),
-        backgroundColor: Colors.orangeAccent,
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('buisness_profiles')
-            .doc(businessId)
-            .collection('menu')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Menüde ürün bulunamadı."));
-          }
-
-          final menuItems = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: menuItems.length,
-            itemBuilder: (context, index) {
-              final item = menuItems[index];
-              return ListTile(
-                title: Text(item['name'] ?? "Ürün Adı"),
-                subtitle: Text("${item['price']} ₺"),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-// Adres Ekranı
-class AddressScreen extends StatelessWidget {
-  final String businessId;
-
-  const AddressScreen({required this.businessId, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Adres"),
-        backgroundColor: Colors.orangeAccent,
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('buisness_profiles')
-            .doc(businessId)
-            .collection('address')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Adres bilgisi bulunamadı."));
-          }
-
-          final addressList = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: addressList.length,
-            itemBuilder: (context, index) {
-              final address = addressList[index];
-              return ListTile(
-                title: Text(address['location_name'] ?? "Adres Adı"),
-                subtitle: Text(address['details'] ?? "Adres Detayları"),
-              );
-            },
-          );
-        },
       ),
     );
   }

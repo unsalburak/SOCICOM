@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:socicom/utils/BottomNavigatorBar.dart';
 import 'dart:io';
+ 
 
 class CustomerProfile extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -167,6 +169,19 @@ class _CustomerProfileState extends State<CustomerProfile> {
               ),
             ),
             const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: saveProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Düzenle'),
+            ),
+            const SizedBox(height: 10), // Düzenle butonunu daha yukarı aldık
             Expanded(
               child: ListView(
                 children: [
@@ -229,21 +244,13 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: saveProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Düzenle'),
-            ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigator(
+        currentIndex: 3, // Profil sekmesini aktif yapar
+        userData: widget.userData,
+        userId: widget.userId,
       ),
     );
   }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:socicom/screens/buisness/BuisnessFutureReportsPage.dart';
 import 'package:socicom/screens/buisness/BuisnessReportsPage.dart';
 import 'BuisnessProfilePage.dart'; // İşletme Bilgileriniz sayfası
 import 'BuisnessMenuPage.dart'; // İşletme Menüsü sayfası
 import 'BuisnessAdressPage.dart'; // İşletme Adres sayfası
 import 'BuisnessOrderPage.dart'; // Sipariş Ver sayfası
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class BuisnessMainPage extends StatelessWidget {
   final Map<String, dynamic> buisnessData;
@@ -65,7 +68,7 @@ class BuisnessMainPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BuisnessAdressPage(addressData: addressData),
+                    builder: (context) => BuisnessAdressPage(buisnessData: buisnessData,),
                   ),
                 );
               },
@@ -88,22 +91,111 @@ class BuisnessMainPage extends StatelessWidget {
               },
             ),
             _buildCard(
-              context,
-              icon: Icons.analytics,
+  context,
+  icon: Icons.analytics,
   title: 'İşletme Analizleri',
   subtitle: 'Satışlarınızı ve müşteri analizlerinizi görün.',
-  onTap: () {
-    // Navigator ile PowerBIReportScreen'e yönlendirme
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PowerBIReportScreen(
-          reportId: 'Report1', // Firebase'deki raporun ID'si
+  onTap: () async {
+    try {
+      // Firestore'dan belge ismini al
+      final businessId = buisnessData['buisness_id'];
+      if (businessId != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('Reports')
+            .where('buisness_id', isEqualTo: businessId)
+            .limit(1) // İlk eşleşeni al
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          final reportId = snapshot.docs.first.id; // Belgenin ID'si
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PowerBIReportScreen(
+                reportId: reportId,
+              ),
+            ),
+          );
+        } else {
+          // Eğer eşleşen bir rapor yoksa
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Rapor bulunamadı.'),
+            ),
+          );
+        }
+      } else {
+        // Eğer business_id eksikse
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('İşletme kimliği eksik.'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hata durumunda mesaj göster
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hata: $e'),
         ),
-      ),
-    );
+      );
+    }
   },
 ),
+_buildCard(
+  context,
+  icon: Icons.bar_chart,
+  title: 'Gelecek Raporlar',
+  subtitle: 'Yaklaşan analizlerinizi görün.',
+  onTap: () async {
+    try {
+      // Firestore'dan futureReportId al
+      final businessId = buisnessData['buisness_id'];
+      if (businessId != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('Future_reports') // Farklı bir koleksiyon
+            .where('buisness_id', isEqualTo: businessId)
+            .limit(1) // İlk eşleşeni al
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          final futureReportId = snapshot.docs.first.id; // Belgenin ID'si
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BusinessFutureReportsPage(
+                futureReportId: futureReportId, // Burada futureReportId gönderiliyor
+              ),
+            ),
+          );
+        } else {
+          // Eğer eşleşen bir rapor yoksa
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Yaklaşan rapor bulunamadı.'),
+            ),
+          );
+        }
+      } else {
+        // Eğer business_id eksikse
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('İşletme kimliği eksik.'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hata durumunda mesaj göster
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hata: $e'),
+        ),
+      );
+    }
+  },
+),
+
+
 
           ],
         ),

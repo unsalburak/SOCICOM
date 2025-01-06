@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:socicom/utils/BottomNavigatorBar.dart';
 import 'CustomerPlaceDetails.dart'; // CustomerPlaceDetails sayfasını doğru şekilde dahil edin
+ // BottomNavigator bileşenini dahil edin
 
 class CustomerPlaceList extends StatefulWidget {
   final String userId;
@@ -38,18 +40,16 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
             itemCount: businessList.length,
             itemBuilder: (context, index) {
               final business = businessList[index];
-              final data = business.data() as Map<String, dynamic>?; // Null kontrolü için casting
+              final data = business.data() as Map<String, dynamic>?;
 
               if (data == null) {
                 return const SizedBox(); // Eğer veri null ise boş bir widget döndür
               }
 
               final businessName = data['buisness_name'] ?? "Bilinmeyen İşletme";
-              final businessLogo = data['buisness_logo'] ?? "https://via.placeholder.com/150"; // Varsayılan logo
-              final businessId = business.id; // Belge ID'si
-              final businessAttributeId = data['buisness_id'] ?? "Eksik ID"; // Belge içindeki buisness_id alanı
-
-              // Gender alanını kontrol et
+              final businessLogo = data['buisness_logo'] ?? "https://via.placeholder.com/150";
+              final businessId = business.id;
+              final businessAttributeId = data['buisness_id'] ?? "Eksik ID";
               final String gender = data.containsKey('gender') ? data['gender'] : "Bilinmiyor";
 
               return Padding(
@@ -77,19 +77,20 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
                         MaterialPageRoute(
                           builder: (context) => CustomerPlaceDetails(
                             customerData: {
-                              'documentId': businessId, // Belge ID'si
-                              'buisness_id': businessAttributeId, // Belge içindeki buisness_id
+                              'documentId': businessId,
+                              'buisness_id': businessAttributeId,
                               'buisness_name': businessName,
                               'buisness_logo': businessLogo,
                               'buisness_phone': data['buisness_phone'] ?? '',
                               'buisness_email': data['buisness_email'] ?? '',
                               'buisness_information': data['buisness_information'] ?? '',
-                              'gender': gender, // Kontrol edilen gender
+                              'gender': gender,
                             },
                             userData: {
-                              'gender': widget.userData?['gender'] ?? "Bilinmiyor", // Sadece gender
-                              'birthDate': widget.userData?['birthDate'] ?? "Bilinmiyor", // Sadece birthDate
+                              'gender': widget.userData?['gender'] ?? "Bilinmiyor",
+                              'birthDate': widget.userData?['birthDate'] ?? "Bilinmiyor",
                             },
+                            userId: widget.userId,
                           ),
                         ),
                       );
@@ -100,6 +101,11 @@ class _CustomerPlaceListState extends State<CustomerPlaceList> {
             },
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigator(
+        currentIndex: 1, // İşletmeler sekmesini aktif yapar
+        userData: widget.userData, // Kullanıcı verilerini geçirir
+        userId: widget.userId,     // Kullanıcı ID'sini geçirir
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socicom/BottomNavigatorBar.dart';
+import 'package:socicom/utils/BottomNavigatorBar.dart';
 
 class FriendsList extends StatefulWidget {
   final String userId; // Kullanıcı ID'si
@@ -15,88 +15,120 @@ class FriendsList extends StatefulWidget {
 class _FriendsListState extends State<FriendsList> {
   final TextEditingController _usernameController = TextEditingController();
 
-  Future<List<Map<String, dynamic>>> fetchFriends() async {
-    // Aynı fetchFriends fonksiyonunuz devam ediyor.
-    List<Map<String, dynamic>> friends = [];
-    try {
-      final String actualUserId = widget.userData?['userid'] ?? '';
-      if (actualUserId.isEmpty) return [];
+  // Gerçek zamanlı arkadaş verilerini almak için stream oluşturuyoruz
+  Stream<List<Map<String, dynamic>>> fetchFriendsStream() {
+  final String actualUserId = widget.userData?['userid'] ?? '';
 
-      QuerySnapshot profileSnapshot = await FirebaseFirestore.instance
-          .collection('profiles')
-          .where('userid', isEqualTo: actualUserId)
-          .get();
+  if (actualUserId.isEmpty) {
+    return Stream.value([]); // Eğer kullanıcı ID'si yoksa boş bir liste döndür
+  }
 
-      if (profileSnapshot.docs.isEmpty) return [];
-
-      DocumentSnapshot userProfile = profileSnapshot.docs.first;
-
-      QuerySnapshot friendsSnapshot = await FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(userProfile.id)
-          .collection('friends')
-          .get();
-
-      List<String> friendUserIds = friendsSnapshot.docs
-          .map((doc) => doc['userid'] as String)
-          .toList();
-
-      QuerySnapshot profilesSnapshot = await FirebaseFirestore.instance
-          .collection('profiles')
-          .where('userid', whereIn: friendUserIds)
-          .get();
-
-      for (var doc in profilesSnapshot.docs) {
-        friends.add(doc.data() as Map<String, dynamic>);
-      }
-    } catch (e) {
-      print("Hata: $e");
+  return FirebaseFirestore.instance
+      .collection('profiles')
+      .where('userid', isEqualTo: actualUserId)
+      .snapshots()
+      .asyncMap((profileSnapshot) async {
+    if (profileSnapshot.docs.isEmpty) {
+      return []; // Eğer kullanıcı bulunamazsa boş bir liste döndür
     }
 
-    return friends;
-  }
+    String userProfileId = profileSnapshot.docs.first.id;
+
+    // Kullanıcının friends alt koleksiyonunu oku
+    QuerySnapshot friendsSnapshot = await FirebaseFirestore.instance
+        .collection('profiles')
+        .doc(userProfileId)
+        .collection('friends')
+        .get();
+
+    List<String> friendUserIds = friendsSnapshot.docs
+        .map((doc) => doc['userid'] as String)
+        .toList();
+
+    if (friendUserIds.isEmpty) {
+      return []; // Eğer arkadaş yoksa boş bir liste döndür
+    }
+
+    // Arkadaşların bilgilerini getir
+    QuerySnapshot profilesSnapshot = await FirebaseFirestore.instance
+        .collection('profiles')
+        .where('userid', whereIn: friendUserIds)
+        .get();
+
+    return profilesSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+  });
+}
+
 
   Future<void> addFriend(String username) async {
     try {
-      final userId = widget.userData?['userid'];
-      if (userId == null || userId.isEmpty) return;
-
-      // Kullanıcı adını `profiles` koleksiyonunda arayın
+      // 1. TextField'e girilen username'i arama
       QuerySnapshot userQuery = await FirebaseFirestore.instance
           .collection('profiles')
           .where('username', isEqualTo: username)
           .get();
 
       if (userQuery.docs.isEmpty) {
-        print("Kullanıcı bulunamadı.");
+        print("Kullanıcı bulunamadı: username=$username");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Kullanıcı bulunamadı!")),
         );
         return;
       }
 
-      // İlk sonucu arkadaş olarak ekle
+      // Arkadaş olarak eklenmek istenen kullanıcının bilgilerini al
       DocumentSnapshot friendDoc = userQuery.docs.first;
       String friendUserId = friendDoc['userid'];
+      print("Bulunan arkadaşın userid'si: $friendUserId");
 
-      // Arkadaş ekleme işlemi
+      // 2. Giriş yapmış kullanıcının userid'sini `userData`dan al
+      final String? currentUserId = widget.userData?['userid'];
+      if (currentUserId == null || currentUserId.isEmpty) {
+        print("Giriş yapmış kullanıcı bilgisi eksik.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Kullanıcı bilgileri eksik!")),
+        );
+        return;
+      }
+      print("Giriş yapmış kullanıcının userid'si: $currentUserId");
+
+      // 3. Giriş yapmış kullanıcının random document id'sini bul
+      QuerySnapshot profileQuery = await FirebaseFirestore.instance
+          .collection('profiles')
+          .where('userid', isEqualTo: currentUserId)
+          .get();
+
+      if (profileQuery.docs.isEmpty) {
+        print("Giriş yapmış kullanıcı profili bulunamadı: userid=$currentUserId");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Kullanıcı profili bulunamadı!")),
+        );
+        return;
+      }
+
+      // Giriş yapmış kullanıcının random document id'si
+      String currentUserDocId = profileQuery.docs.first.id;
+      print("Giriş yapmış kullanıcının document id'si: $currentUserDocId");
+
+      // 4. Giriş yapmış kullanıcının friends alt koleksiyonuna yeni bir belge oluştur
       await FirebaseFirestore.instance
           .collection('profiles')
-          .doc(widget.userData?['docId']) // Kullanıcının belgesi
+          .doc(currentUserDocId) // Giriş yapmış kullanıcının document ID'si
           .collection('friends')
-          .doc(friendUserId)
-          .set({
-        'userid': friendUserId,
-        'name': friendDoc['name'] ?? '',
-        'email': friendDoc['email'] ?? '',
-        'profileImage': friendDoc['profileImage'] ?? '',
+          .add({
+        'userid': friendUserId, // Eklenen arkadaşın userid'si
       });
 
+      print("Arkadaş başarıyla eklendi.");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Arkadaş eklendi!")),
+        const SnackBar(content: Text("Arkadaş başarıyla eklendi!")),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Hata durumunda detaylı loglama
       print("Arkadaş eklenirken hata oluştu: $e");
+      print("StackTrace: $stackTrace");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Bir hata oluştu!")),
       );
@@ -136,8 +168,8 @@ class _FriendsListState extends State<FriendsList> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: fetchFriends(),
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: fetchFriendsStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

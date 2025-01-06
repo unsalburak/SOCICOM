@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socicom/BottomNavigatorBar.dart';
+import 'package:socicom/utils/BottomNavigatorBar.dart';
 import 'package:socicom/screens/customer/CustomerMainPage.dart';
 import 'package:socicom/screens/customer/NewCustomerProfileScreen.dart'; // Yeni sayfa import edilmiştir.
 

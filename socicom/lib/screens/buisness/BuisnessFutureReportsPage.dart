@@ -4,16 +4,17 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-class PowerBIReportScreen extends StatefulWidget {
-  final String reportId; // Firebase'deki belge ID'si
+class BusinessFutureReportsPage extends StatefulWidget {
+  final String futureReportId; // Firebase'deki belge ID'si
 
-  const PowerBIReportScreen({super.key, required this.reportId});
+  const BusinessFutureReportsPage({super.key, required this.futureReportId});
 
   @override
-  _PowerBIReportScreenState createState() => _PowerBIReportScreenState();
+  _BusinessFutureReportsPageState createState() =>
+      _BusinessFutureReportsPageState();
 }
 
-class _PowerBIReportScreenState extends State<PowerBIReportScreen> {
+class _BusinessFutureReportsPageState extends State<BusinessFutureReportsPage> {
   late final WebViewController _controller;
   String? embedUrl;
 
@@ -71,8 +72,8 @@ class _PowerBIReportScreenState extends State<PowerBIReportScreen> {
   Future<void> _fetchEmbedUrlFromFirebase() async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('Reports')
-          .doc(widget.reportId)
+          .collection('Future_reports') // Koleksiyon adı değiştirildi
+          .doc(widget.futureReportId) // Belge ID'si future_reportId olarak değiştirildi
           .get();
 
       if (doc.exists && doc.data()!.containsKey('embedUrl')) {
@@ -98,7 +99,7 @@ class _PowerBIReportScreenState extends State<PowerBIReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Power BI Report'),
+        title: const Text('Business Future Report'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
